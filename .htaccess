@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+
+    RewriteEngine On
+    RewriteBase /yui-srsSteps
+
+  # internally rewrite paths to query strings but only if:
+  # the request isn't for an existing file
+  RewriteCond %{REQUEST_FILENAME} !-f
+  # the request isn't for an existing directory
+  RewriteCond %{REQUEST_FILENAME} !-d
+  # the request isn't for the index file itself
+  RewriteCond %{REQUEST_URI} !^/index\.html
+  RewriteRule ^(.+)$ /yui-srsSteps/index.html [NS,L]
+</IfModule>

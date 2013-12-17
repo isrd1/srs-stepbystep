@@ -1,0 +1,17 @@
+{ 
+  "ResultSet" : 
+    { 
+      "Result" : [ 
+         { "coursecode" : "ACM1GNN01",
+            "coursetitle" : "APPLIED COMPUTING",
+            "department" : "Computing"
+         },
+         { "coursecode" : "ACT6BNN31",
+            "coursetitle" : "COMPUTING TECHNOLOGIES",
+            "department" : "Computing"
+         }
+      ],
+      "RowCount" : 2
+    },
+    "status" : "ok"
+}
