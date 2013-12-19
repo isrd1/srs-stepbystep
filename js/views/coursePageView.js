@@ -18,6 +18,7 @@ YUI().add('coursePageView', function (Y) {
      */
     Y.CoursePageView = Y.Base.create('coursePageView', Y.View, [], {
         courses: null,
+        template: Y.Handlebars.compile(Y.one('#coursesDisplay').getHTML()),
         /**
          * Constructor for this class
          * @method initializer 
@@ -40,10 +41,7 @@ YUI().add('coursePageView', function (Y) {
 
             content.append("<h3>Courses</h3>");
             if (this.courses !== null) {
-                coursesOL = new Y.Node.create('<ol/>');
-                this.courses.each(function (course){
-                    coursesOL.appendChild('<li>'+course.coursetitle+'</li>');
-                });
+                coursesOL = this.template({courses:this.courses.toJSON()});
                 content.append(coursesOL);
             }
             
@@ -74,5 +72,5 @@ YUI().add('coursePageView', function (Y) {
         }
     });
 }, '0.0.9', {
-    requires: []
+    requires: ['handlebars']
 });

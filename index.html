@@ -30,6 +30,12 @@
 <!-- script src="/yui-srsSteps/js/yui_config.js"></script-->
 <script src="http://yui.yahooapis.com/3.13.0/build/yui/yui.js"></script>
 <script src="/yui-srsSteps/js/main.js"></script>
-
+<script type='text/x-handlebars-template' id='coursesDisplay'>
+  <ol>
+  {{#each courses}}
+    <li>{{coursecode}}: {{coursetitle}}</li>
+  {{/each}}
+  </ol>
+</script>
 </body>
 </html>
