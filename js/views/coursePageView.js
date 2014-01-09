@@ -25,6 +25,13 @@ YUI().add('coursePageView', function (Y) {
         initializer: function () {
            Y.log('inside coursePageView initializer');
            this.courses = this.get('courses');
+           
+           // create a datatable to display the data rather than a template
+           this.table = new Y.DataTable({
+                recordType: this.courses.model,
+                sortable: true,
+                data: this.courses
+            });
         },
 
         /**
@@ -36,16 +43,11 @@ YUI().add('coursePageView', function (Y) {
             var container = this.get('container'),  /* defined in the ATTR section below 
                 A document fragment is created to hold the resulting HTML created from rendering the two sub-views. */
                 content = Y.one(Y.config.doc.createDocumentFragment()),
-                coursesOL;
+                tableContent = Y.Node.create('<div class="master" id="courseTable"/>');
 
-            content.append("<h3>Courses</h3>");
-            if (this.courses !== null) {
-                coursesOL = new Y.Node.create('<ol/>');
-                this.courses.each(function (course){
-                    coursesOL.appendChild('<li>'+course.coursetitle+'</li>');
-                });
-                content.append(coursesOL);
-            }
+            this.table.render(tableContent);
+            
+            content.append(tableContent);
             
             if (!container.inDoc()) {
                 container.set('id', 'courseList');  /* give the display container an id so we can render the table in it */
@@ -74,5 +76,5 @@ YUI().add('coursePageView', function (Y) {
         }
     });
 }, '0.0.9', {
-    requires: []
+    requires: ['datatable']
 });
