@@ -43,11 +43,11 @@ YUI().add('coursePageView', function (Y) {
             var container = this.get('container'),  /* defined in the ATTR section below 
                 A document fragment is created to hold the resulting HTML created from rendering the two sub-views. */
                 content = Y.one(Y.config.doc.createDocumentFragment()),
-                tableContent = Y.Node.create('<div class="master" id="courseTable"/>');
+                tableNode = Y.Node.create('<div class="master" id="courseTable"/>');
 
-            this.table.render(tableContent);
+            this.table.render(tableNode);
             
-            content.append(tableContent);
+            content.append(tableNode);
             
             if (!container.inDoc()) {
                 container.set('id', 'courseList');  /* give the display container an id so we can render the table in it */
