@@ -21,6 +21,8 @@ YUI().add('srsApp', function (Y) {
         initializer: function () {
            this.once('ready', function (e) {
                
+               Y.on('srsapp:courseChange', this.navigateToStudents, this);
+               
                if (this.hasRoute(this.getPath())) {
                    this.dispatch();
                }
@@ -39,6 +41,11 @@ YUI().add('srsApp', function (Y) {
                 type: Y.CoursePageView,
                 preserve: false
             }
+        },
+        
+        navigateToStudents: function (e) {
+            Y.log('navigate to students on course ' + e.course.coursecode );
+            Y.log(e);
         },
         
         /**
