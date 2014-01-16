@@ -39,6 +39,10 @@ YUI().add('srsApp', function (Y) {
         views: {
             coursePage: {
                 type: Y.CoursePageView,
+                preserve: true
+            },
+            studentView: {
+                type: Y.StudentView,
                 preserve: false
             }
         },
@@ -46,7 +50,27 @@ YUI().add('srsApp', function (Y) {
         navigateToStudents: function (e) {
             Y.log('navigate to students on course ' + e.course.coursecode );
             Y.log(e);
+            this.navigate('/yui-srsSteps/courses/'+e.course.coursecode + '/');
         },
+
+        /**
+         * Will load the models for each student into a modelList given a coursecode
+         * @method getStudents
+         * @param req The http request
+         * @param res A resource object
+         * @param next If the callback for the path is an array of methods this contains the next method to call
+         */
+        getStudents: function (req, res, next) {
+            var coursecode = req.params.course || null,
+                students = this.get('students');
+            // put the students in the request so it'll be passed on to the next part of the route
+            req.students = students;
+            req.coursecode = coursecode;
+            students.load({coursecode:coursecode},function () {
+                students.logger();
+                next();
+            });
+         },
         
         /**
          * Will load the models for each course into a modelList
@@ -76,7 +100,7 @@ YUI().add('srsApp', function (Y) {
         },
         
         /**
-         * Will show the course page view, the course page view will control two sub-views, one for courses and one for students if a course is chosen
+         * Will show the course page view to show courses
          * @method showCoursePage
          * @param req
          * @param res
@@ -92,7 +116,26 @@ YUI().add('srsApp', function (Y) {
             // make sure next() is a function by giving it a default value of an empty function if it's not a function already
             Y.Lang.isFunction(next) || (next = function () {} );
             next();
-        }
+        },
+        
+        /**
+         * Will show the student view listing students on a given course
+         * @method showCoursePage
+         * @param req
+         * @param res
+         * @param next
+         */
+        showStudentPage: function (req, res, next) {
+            Y.log('in showStudentPage');
+            try {
+                this.showView('studentView', {students: req.students, coursecode:req.coursecode});
+            } catch (e) {
+                Y.log(e.message);
+            }
+            // make sure next() is a function by giving it a default value of an empty function if it's not a function already
+            Y.Lang.isFunction(next) || (next = function () {} );
+            next();
+        },
         
     }, {
         /**
@@ -102,6 +145,9 @@ YUI().add('srsApp', function (Y) {
         ATTRS: {
             courses: {
                 value: new Y.CourseList()
+            },
+            students: {
+                value: new Y.StudentList()  
             },
             root: {
                 value: '/yui-srsSteps/'
@@ -121,11 +167,18 @@ YUI().add('srsApp', function (Y) {
                             'getCourses',
                             'showCoursePage'
                         ]
-                    }   
+                    },
+                    {
+                        path: '/courses/:course/',
+                        callbacks: [
+                            'getStudents',
+                            'showStudentPage'
+                        ]
+                    }
                 ]
             }
         }
     });
 }, '0.0.1', {
-    requires: ['app', 'coursePageView']
+    requires: ['app', 'coursePageView', 'studentView']
 });

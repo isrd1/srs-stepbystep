@@ -4,7 +4,7 @@ YUI({
     modules: {
         srsApp: {
             path: 'routerApp.js',
-            requires: ['app', 'coursePageView', 'courseList']
+            requires: ['app', 'coursePageView', 'courseList', 'studentList']
         },
         courseModel: {
             path: 'models/courseModel.js',
@@ -17,7 +17,19 @@ YUI({
         coursePageView: {
             path: 'views/coursePageView.js',
             requires: []
-        }
+        },
+        studentModel: {
+            path: 'models/studentModel.js',
+            requires: []
+        },
+        studentList: {
+            path: 'models/studentList.js',
+            requires: ['studentModel']
+        },
+        studentView: {
+            path: 'views/studentView.js',
+            requires: []
+        }        
     }
 }).use('srsApp', function (Y) {
         var srsApp = new Y.SRSApp({

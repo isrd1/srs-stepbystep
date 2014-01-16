@@ -1,0 +1,21 @@
+{ 
+  "ResultSet" : 
+     { 
+        "Result" : [ 
+           { "email" : "mark.parkin@srs.ac.uk",
+             "forename" : "Mark",
+             "stage" : "3",
+             "studentid" : "a6020974",
+             "surname" : "Parkin"
+           },
+           { "email" : "noel.syedzada@srs.ac.uk",
+             "forename" : "Noel",
+             "stage" : "2",
+             "studentid" : "a6028310",
+             "surname" : "Syedzada"
+           }
+        ],
+      "RowCount" : 2
+    },
+   "status" : "ok"
+}

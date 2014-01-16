@@ -51,6 +51,13 @@ h1, h2, h3, h4, h5 {
     display:block !important;
 }
 
+.yui3-datatable-table caption.yui3-datatable-caption {
+	font-weight: bold;
+	color: #663;
+	font-size: 1em;
+	text-align: left;
+}
+
 .tab {
     margin: 30px 0 3em 0;
     padding: 10px 0;
