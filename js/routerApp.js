@@ -37,13 +37,9 @@ YUI().add('srsApp', function (Y) {
          *  @type {object}
         */
         views: {
-            coursePage: {
+            coursePage: {  // only one view since this will manage subviews for course & student
                 type: Y.CoursePageView,
                 preserve: true
-            },
-            studentView: {
-                type: Y.StudentView,
-                preserve: false
             }
         },
         
@@ -80,7 +76,9 @@ YUI().add('srsApp', function (Y) {
          * @param next If the callback for the path is an array of methods this contains the next method to call
          */
         getCourses: function (req, res, next) {
-            var courses = this.get('courses');
+            var courses = this.get('courses'),   // defined in ATTRS section below
+                courseChosen = req.params.course || false;
+            
             Y.log('in getCourses');
             Y.log(req);
             // add the courses to the request object so it'll be passed on to the next part of the route
@@ -89,7 +87,7 @@ YUI().add('srsApp', function (Y) {
             // make sure next() is a function by giving it a default value of an empty function if it's not a function already
             Y.Lang.isFunction(next) || (next = function () {} );
             
-            if (courses.isEmpty()) {       // there are no courses loaded then
+            if (courses.isEmpty()) {       // there are no courses already loaded then
                 courses.load(function () { // call course load (which will sync etc)
                     courses.logger();      // debug by calling logger()
                     next();                // call next only when the courses are loaded
@@ -107,15 +105,35 @@ YUI().add('srsApp', function (Y) {
          * @param next
          */
         showCoursePage: function (req, res, next) {
-            Y.log('in showCoursePage');
+            var viewConfig = null;  // we might invoke the view with or without students so we'll use a config object to pass as an argument for clarity
+            
+            if (req.courseChosen) {
+                viewConfig = {
+                        courseList: req.courses, 
+                        courseChosen: req.courseChosen, 
+                        coursecode: req.params.course, 
+                        studentList:req.students
+                };
+            } else {
+                viewConfig = {
+                        courseList: req.courses
+                };
+            }
+            Y.log('opening course list view using this request:');
+            Y.log(req);
             try {
-                this.showView('coursePage', {courses: req.courses});
+                if (!req.courseChosen && this.views['coursePage'].preserve == true) { // if there are no students but there were last time 
+                    this.views['coursePage'].preserve = false;
+                }
+                this.showView('coursePage', viewConfig);
             } catch (e) {
                 Y.log(e.message);
             }
+            this.views['coursePage'].preserve = (req.courseChosen !== false);
             // make sure next() is a function by giving it a default value of an empty function if it's not a function already
             Y.Lang.isFunction(next) || (next = function () {} );
             next();
+
         },
         
         /**
@@ -171,6 +189,7 @@ YUI().add('srsApp', function (Y) {
                     {
                         path: '/courses/:course/',
                         callbacks: [
+                            'getCourses',
                             'getStudents',
                             'showStudentPage'
                         ]

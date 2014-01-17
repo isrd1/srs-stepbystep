@@ -29,7 +29,12 @@ YUI({
         studentView: {
             path: 'views/studentView.js',
             requires: []
-        }        
+        },
+        courseListView: {
+            path: 'views/courseListView.js',
+            requires: []
+        }       
+    
     }
 }).use('srsApp', function (Y) {
         var srsApp = new Y.SRSApp({

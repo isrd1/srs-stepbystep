@@ -17,73 +17,77 @@ YUI().add('coursePageView', function (Y) {
      * @constructor
      */
     Y.CoursePageView = Y.Base.create('coursePageView', Y.View, [], {
-        courses: null,
+        courseView: null,           
+        studentView: null,          // the student view rendered if a course is chosen by StudentListView
+        courseViewContent: null,    // the course data but rendered as a view by CourseListView
+        courseList: null,           // the course data
         /**
          * Constructor for this class
          * @method initializer 
          */
         initializer: function () {
-           Y.log('inside coursePageView initializer');
-           this.courses = this.get('courses');
-           
-           Y.publish('srsapp:courseChange', {
-               preventable: false
-           });
-           
-           // create a datatable to display the data rather than a template
-           this.table = new Y.DataTable({
-                recordType: this.courses.model,
-                sortable: true,
-                data: this.courses
-            });
-           
-           // add a new attribute to track selected row with a null value
-           this.table.addAttr("selectedRow", { value: null });
-           
-           // delegate any clicks on a row to a function which sets the selectedRow attribute to the row clicked
-           this.table.delegate('click', function (e) {
-               this.set('selectedRow', e.currentTarget);
-            }, '.yui3-datatable-data tr', this.table);
+            var chosenCourse = this.get('chosenCourse'),
+            courseList = this.get('courseList'),
+            studentList = this.get('studentList');
+            
+            Y.log('inside coursePageView initializer');
+            
+            /**
+             * if showing students get the coursecode from the information passed in the constructor
+             * and construct a view for students
+             */ 
+            if (chosenCourse !== undefined) {
+                this.studentView = new Y.StudentView({modelList: studentList});
+            }
+            /**
+             * construct a course list view if one doesn't yet exist, no need to make if already there
+             */
+            if (this.courseView == null) {
+                this.courseView = new Y.CourseListView({modelList: courseList});
+                this.courseView.addTarget(this);
+            }
 
-           // if there is a selectedRowChange event then change the selected row and fire
-           // a 'courseChange' event, the router has a listener for this event
-           this.table.after('selectedRowChange', function (e) {
-               var tr = e.newVal,
-                   last_tr = e.prevVal,
-                   record = this.getRecord(tr);
-               
-               // change which row has the selected class
-               if (last_tr) {
-                   last_tr.removeClass('selected');
-               }
-               tr.addClass('selected');
-               // fire the change event
-               Y.fire('srsapp:courseChange', {course:record});
-
-           });
+            this.courses = this.get('courses');
+           
         },
 
+        /**
+         * This destructor is specified so this view's sub-views can be properly destroyed and cleaned up.
+         * @method destructor
+         * 
+         */ 
+        destructor: function () {
+            this.courseView.destroy();
+            this.studentView && this.studentView.destroy();
+
+            delete this.courseView;
+            this.studentView && delete this.studentView;
+        },
+        
         /**
          * Creates the content to insert in the view
          * @method render 
          * @return {object} returns 'this' and so is chainable
          */
         render: function () {
-            var container = this.get('container'),  /* defined in the ATTR section below 
-                A document fragment is created to hold the resulting HTML created from rendering the two sub-views. */
-                content = Y.one(Y.config.doc.createDocumentFragment()),
-                tableNode = Y.Node.create('<div class="master" id="courseTable"/>');
+            var container = this.get('container'),
+                // A document fragment is created to hold the resulting HTML created from rendering the two sub-views.
+                content = Y.one(Y.config.doc.createDocumentFragment());
 
-            this.table.render(tableNode);
-            
-            content.append(tableNode);
-            
+            // This renders each of the two sub-views into the document fragment, then sets the fragment as the contents of this view's container.
+            if (this.courseViewContent == null) { // only render the course view content once since it never changes.
+                this.courseViewContent = this.courseView.render().get('container');
+            }
+            content.append(this.courseViewContent);
+            if (this.studentView) {
+                content.append(this.studentView.render().get('container'));
+            }
             if (!container.inDoc()) {
-                container.set('id', 'courseList');  /* give the display container an id so we can render the table in it */
+                container.set('id', 'courseInfo');  // give the display container an id so we can render the table in it
                 Y.one('body').append(container);
             }
 
-            /* Sets the document fragment containing the two rendered sub-views as the contents of this view's container. */
+            // Sets the document fragment containing the two rendered sub-views as the contents of this view's container.
             container.setHTML(content);
 
             Y.log('inside coursePageView render');
@@ -99,11 +103,11 @@ YUI().add('coursePageView', function (Y) {
         ATTRS: {
             container: {
                 valueFn: function () {
-                    return Y.Node.create('<div/>');
+                    return Y.Node.create("<div class='master'/>");
                 }
             }
         }
     });
 }, '0.0.9', {
-    requires: ['datatable']
+    requires: ['courseListView', 'studentListView']
 });
