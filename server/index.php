@@ -35,6 +35,7 @@ switch ($route) {
                               ORDER BY surname, forename";
         $rs                = new JSONRecordSet();
         $retval            = $rs->getRecordSet($sqlCourseStudents);
+        $retval            = ($retval !== false) ? $retval : '{"status":"error", "ResultSet" :{"RowCount":0,"Result":[]}}';
         echo $retval;
         break;
     /**

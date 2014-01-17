@@ -17,7 +17,7 @@ YUI().add('srsApp', function (Y) {
      * @constructor
      */
     Y.SRSApp = Y.Base.create('srsApp', Y.App, [], {
-
+        
         initializer: function () {
            this.once('ready', function (e) {
                
@@ -76,8 +76,7 @@ YUI().add('srsApp', function (Y) {
          * @param next If the callback for the path is an array of methods this contains the next method to call
          */
         getCourses: function (req, res, next) {
-            var courses = this.get('courses'),   // defined in ATTRS section below
-                courseChosen = req.params.course || false;
+            var courses = this.get('courses');   // defined in ATTRS section below
             
             Y.log('in getCourses');
             Y.log(req);
@@ -107,53 +106,55 @@ YUI().add('srsApp', function (Y) {
         showCoursePage: function (req, res, next) {
             var viewConfig = null;  // we might invoke the view with or without students so we'll use a config object to pass as an argument for clarity
             
-            if (req.courseChosen) {
+            if (req.coursecode) {
                 viewConfig = {
-                        courseList: req.courses, 
-                        courseChosen: req.courseChosen, 
+                        courseList: req.courses,
                         coursecode: req.params.course, 
                         studentList:req.students
                 };
             } else {
                 viewConfig = {
+                        coursecode: null,
                         courseList: req.courses
                 };
             }
             Y.log('opening course list view using this request:');
             Y.log(req);
+            /**
+             * there are various possible options, only show courses, show courses and students etc, read the comments for more detail
+             */
             try {
-                if (!req.courseChosen && this.views['coursePage'].preserve == true) { // if there are no students but there were last time 
-                    this.views['coursePage'].preserve = false;
+                // there is a coursePage instance and a course code but the subView hasn't yet been displayed
+                if (this.views.coursePage.instance && req.coursecode && !this.alreadyRenderedStudents) {
+                    this.views.coursePage.instance.loadSubView(viewConfig).render(viewConfig.coursecode);
+                    this.alreadyRenderedStudents = true;
                 }
-                this.showView('coursePage', viewConfig);
-            } catch (e) {
+                // this isn't a coursePage instance but there is a course code so it's a deep link and we need to show both courses and the subView
+                else if (!this.views.coursePage.instance && req.coursecode) {
+                    this.showView('coursePage', viewConfig);
+                    this.views.coursePage.instance.loadSubView(viewConfig).render();
+                } 
+                // we have a course view & a studentView but no course code so we want to remove the subview and reset the alreadyRenderedStudents flag
+                else if (this.views.coursePage.instance && this.views.coursePage.instance.studentView && !req.coursecode) {
+                    this.views.coursePage.instance.unloadSubView().render();
+                    this.alreadyRenderedStudents = false;
+                }
+                // it's a link just to courses since there's no course code
+                else {
+                    // don't bother showing the view if we're already showing it
+                    if (this.get('activeView') !== this.views.coursePage.instance) {
+                        this.showView('coursePage', viewConfig, {update:true, render:true});
+                    }
+                }
+            } catch (e) {  // in case there's any error just silently display it.
                 Y.log(e.message);
             }
-            this.views['coursePage'].preserve = (req.courseChosen !== false);
             // make sure next() is a function by giving it a default value of an empty function if it's not a function already
             Y.Lang.isFunction(next) || (next = function () {} );
             next();
 
         },
         
-        /**
-         * Will show the student view listing students on a given course
-         * @method showCoursePage
-         * @param req
-         * @param res
-         * @param next
-         */
-        showStudentPage: function (req, res, next) {
-            Y.log('in showStudentPage');
-            try {
-                this.showView('studentView', {students: req.students, coursecode:req.coursecode});
-            } catch (e) {
-                Y.log(e.message);
-            }
-            // make sure next() is a function by giving it a default value of an empty function if it's not a function already
-            Y.Lang.isFunction(next) || (next = function () {} );
-            next();
-        },
         
     }, {
         /**
@@ -191,9 +192,9 @@ YUI().add('srsApp', function (Y) {
                         callbacks: [
                             'getCourses',
                             'getStudents',
-                            'showStudentPage'
+                            'showCoursePage'
                         ]
-                    }
+                    },
                 ]
             }
         }

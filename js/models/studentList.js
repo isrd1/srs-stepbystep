@@ -2,11 +2,21 @@ YUI().add('studentList', function (Y) {
     Y.StudentList = Y.Base.create('studentList', Y.ModelList, [Y.ModelSync.REST], {
         // By convention Y.StudentList's `root` will be used for the lists' URL.
         model: Y.StudentModel,
-        url: '/yui-srsSteps/server/index.php?action=listCourse&subject=students&id='+this.coursecode,
+        /**
+         * use a function to return the url since it contains dynamic information, the coursecode 
+         * @method getURL
+         * @param {string} coursecode of the students to be loaded
+         * @returns {String}
+         */
+        getURL: function (coursecode) { 
+            return '/yui-srsSteps/server/index.php?action=listCourse&subject=students&id='+coursecode;
+        },
+        
     
         sync: function (action, options, callback) {
+            var courseCode = options.coursecode || null;  // course code is passed in by routerApp when load is called
             if (action === 'read') {
-                Y.io(this.url, {
+                Y.io(this.getURL(courseCode), {
                     on: {
                         complete: function(id, xhr) {
                             Y.Lang.isFunction(callback) || (callback = function () { });

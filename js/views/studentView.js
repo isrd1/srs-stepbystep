@@ -17,7 +17,6 @@ YUI().add('studentView', function (Y) {
      * @constructor
      */
     Y.StudentView = Y.Base.create('studentView', Y.View, [], {
-        courses: null,
         /**
          * Constructor for this class
          * @method initializer 
@@ -32,7 +31,7 @@ YUI().add('studentView', function (Y) {
                 recordType: this.students.model,
                 sortable: true,
                 data: this.students,
-                caption: 'students on course: ' +this.get('coursecode')
+                caption: 'Students on course'
             });
         },
 
@@ -46,15 +45,15 @@ YUI().add('studentView', function (Y) {
                 A document fragment is created to hold the resulting HTML created from rendering the two sub-views. */
                 content = Y.one(Y.config.doc.createDocumentFragment()),
                 tableNode = Y.Node.create('<div class="master" id="studentTable"/>');
-
+            
             this.table.render(tableNode);
             
             content.append(tableNode);
             
-            if (!container.inDoc()) {
-                container.set('id', 'studentList');  /* give the display container an id so we can render the table in it */
-                Y.one('body').append(container);
-            }
+//            if (!container.inDoc()) {
+//                container.set('id', 'studentList');  /* give the display container an id so we can render the table in it */
+//                Y.one('body').append(container);
+//            }
 
             /* Sets the document fragment containing the two rendered sub-views as the contents of this view's container. */
             container.setHTML(content);
@@ -72,7 +71,7 @@ YUI().add('studentView', function (Y) {
         ATTRS: {
             container: {
                 valueFn: function () {
-                    return Y.Node.create('<div/>');
+                    return Y.Node.create('<div id="studentList" />');
                 }
             }
         }

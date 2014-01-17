@@ -21,33 +21,19 @@ YUI().add('coursePageView', function (Y) {
         studentView: null,          // the student view rendered if a course is chosen by StudentListView
         courseViewContent: null,    // the course data but rendered as a view by CourseListView
         courseList: null,           // the course data
+        coursecode: null,
         /**
          * Constructor for this class
          * @method initializer 
          */
         initializer: function () {
-            var chosenCourse = this.get('chosenCourse'),
-            courseList = this.get('courseList'),
-            studentList = this.get('studentList');
+            var courseList = this.get('courseList');
             
             Y.log('inside coursePageView initializer');
             
-            /**
-             * if showing students get the coursecode from the information passed in the constructor
-             * and construct a view for students
-             */ 
-            if (chosenCourse !== undefined) {
-                this.studentView = new Y.StudentView({modelList: studentList});
-            }
-            /**
-             * construct a course list view if one doesn't yet exist, no need to make if already there
-             */
-            if (this.courseView == null) {
-                this.courseView = new Y.CourseListView({modelList: courseList});
-                this.courseView.addTarget(this);
-            }
-
-            this.courses = this.get('courses');
+            this.courseView = new Y.CourseListView({modelList: courseList});
+            this.courseView.addTarget(this);
+            this.coursecode = this.get('coursecode');
            
         },
 
@@ -57,19 +43,48 @@ YUI().add('coursePageView', function (Y) {
          * 
          */ 
         destructor: function () {
+            this.unloadSubView();
             this.courseView.destroy();
-            this.studentView && this.studentView.destroy();
-
             delete this.courseView;
+        },
+        
+        /**
+         * A method to create an instance of StudentView
+         * @method loadSubView
+         * @param config
+         * @returns {___anonymous513_4270}
+         */
+        loadSubView: function (config) {
+            var studentList = config.studentList;
+            
+            this.coursecode = config.coursecode;
+            Y.log('inside coursePageView.loadSubView');
+            
+            /**
+             * if showing students get the coursecode from the information passed in the constructor
+             * and construct a view for students
+             */ 
+            if (this.coursecode !== undefined && this.studentView == null) {
+                this.studentView = new Y.StudentView({students: studentList, coursecode:this.coursecode});
+            } 
+
+            return this;
+        },
+        
+        unloadSubView: function () {
+            this.studentView && this.studentView.destroy();
             this.studentView && delete this.studentView;
+            
+            return this;
         },
         
         /**
          * Creates the content to insert in the view
          * @method render 
+         * @param {string} coursecode passed when called manually but not when called by showView
          * @return {object} returns 'this' and so is chainable
          */
-        render: function () {
+        render: function (coursecode) {
             var container = this.get('container'),
                 // A document fragment is created to hold the resulting HTML created from rendering the two sub-views.
                 content = Y.one(Y.config.doc.createDocumentFragment());
@@ -78,8 +93,9 @@ YUI().add('coursePageView', function (Y) {
             if (this.courseViewContent == null) { // only render the course view content once since it never changes.
                 this.courseViewContent = this.courseView.render().get('container');
             }
-            content.append(this.courseViewContent);
-            if (this.studentView) {
+            content.append(this.courseViewContent);  // append the course list to the content
+            
+            if (this.studentView && (coursecode || this.get('coursecode'))) { // if we have a studentView and a coursecode then add the student view to content too
                 content.append(this.studentView.render().get('container'));
             }
             if (!container.inDoc()) {
@@ -109,5 +125,5 @@ YUI().add('coursePageView', function (Y) {
         }
     });
 }, '0.0.9', {
-    requires: ['courseListView', 'studentListView']
+    requires: ['courseListView', 'studentView']
 });
