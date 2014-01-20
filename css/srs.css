@@ -46,7 +46,9 @@ h1, h2, h3, h4, h5 {
 .contents h2 {
 	margin-bottom: 0.25em;
 }
-
+#contents .yui3-datatable-table {
+	width: 100%;
+}
 #contents div.yui3-datatable {
     display:block !important;
 }
