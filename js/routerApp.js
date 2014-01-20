@@ -142,7 +142,8 @@ YUI().add('srsApp', function (Y) {
                 // it's a link just to courses since there's no course code
                 else {
                     // don't bother showing the view if we're already showing it
-                    if (this.get('activeView') !== this.views.coursePage.instance) {
+                    //if (this.get('activeView') !== this.views.coursePage.instance) {   // this line and the following work the same but I think the instanceof approach is better
+                    if (!(this.get('activeView') instanceof this.views.coursePage.type)) {
                         this.showView('coursePage', viewConfig, {update:true, render:true});
                     }
                 }
