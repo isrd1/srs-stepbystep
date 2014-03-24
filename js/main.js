@@ -33,13 +33,13 @@ YUI({
         courseListView: {
             path: 'views/courseListView.js',
             requires: []
-        }       
-    
+        }
+
     }
-}).use('srsApp', function (Y) {
+}).use('srsApp', function(Y) {
         var srsApp = new Y.SRSApp({
                 transitions: true,
-                container    : '#wrapper',
+                container: '#wrapper',
                 viewContainer: '#contents'
             }); // create a new SJSApp instance
         srsApp.render();
