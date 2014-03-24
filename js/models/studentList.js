@@ -28,6 +28,20 @@ YUI().add('studentList', function (Y) {
                                 callback(xhr.statusText, xhr);
                             }
 
+                        },  // this is a repeat of what's in courseList, need to put into separate module to reuse
+                        start: function (id, args){
+                            try {
+                                Y.one('#wrapper').addClass('loading');
+                            } catch (e) {
+                                Y.log(e);
+                            }
+                        },
+                        end: function (id, args){
+                            try {
+                                Y.one('#wrapper').removeClass('loading');
+                            } catch (e) {
+                                Y.log(e);
+                            }
                         }
                     }
                 });
