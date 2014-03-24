@@ -8,8 +8,8 @@
  * @module srsApp
 */
 
-YUI().add('srsApp', function (Y) {
-    "use strict";
+YUI().add('srsApp', function(Y) {
+    'use strict';
     /**
      * The SRSApp class is the controller or router
      * @class SRSApp
@@ -17,18 +17,18 @@ YUI().add('srsApp', function (Y) {
      * @constructor
      */
     Y.SRSApp = Y.Base.create('srsApp', Y.App, [], {
-        
-        initializer: function () {
-           this.once('ready', function (e) {
-               
+
+        initializer: function() {
+           this.once('ready', function(e) {
+
                Y.on('srsapp:courseChange', this.navigateToStudents, this);
-               
+
                if (this.hasRoute(this.getPath())) {
                    this.dispatch();
                }
            });
         },
-        
+
         /**
          *  This is where we can declare our page-level views and define the relationship between
          *  the "pages" of our application. We can later use the `showView()` method to create and
@@ -42,75 +42,75 @@ YUI().add('srsApp', function (Y) {
                 preserve: true
             }
         },
-        
-        navigateToStudents: function (e) {
-            Y.log('navigate to students on course ' + e.course.coursecode );
+
+        navigateToStudents: function(e) {
+            Y.log('navigate to students on course ' + e.course.coursecode);
             Y.log(e);
-            this.navigate('/yui-srsSteps/courses/'+e.course.coursecode + '/');
+            this.navigate('/yui-srsSteps/courses/' + e.course.coursecode + '/');
         },
 
         /**
          * Will load the models for each student into a modelList given a coursecode
          * @method getStudents
-         * @param req The http request
-         * @param res A resource object
-         * @param next If the callback for the path is an array of methods this contains the next method to call
+         * @param {object} req The http request
+         * @param {object} res A resource object
+         * @param {function} next If the callback for the path is an array of methods this contains the next method to call
          */
-        getStudents: function (req, res, next) {
+        getStudents: function(req, res, next) {
             var coursecode = req.params.course || null,
                 students = this.get('students');
             // put the students in the request so it'll be passed on to the next part of the route
             req.students = students;
             req.coursecode = coursecode;
-            students.load({coursecode:coursecode},function () {
+            students.load({coursecode:coursecode}, function() {
                 students.logger();
                 next();
             });
          },
-        
+
         /**
          * Will load the models for each course into a modelList
          * @method getCourses
-         * @param req The http request
-         * @param res A resource object
-         * @param next If the callback for the path is an array of methods this contains the next method to call
+         * @param {object} req The http request
+         * @param {object} res A resource object
+         * @param {function} next If the callback for the path is an array of methods this contains the next method to call
          */
-        getCourses: function (req, res, next) {
+        getCourses: function(req, res, next) {
             var courses = this.get('courses');   // defined in ATTRS section below
-            
+
             Y.log('in getCourses');
             Y.log(req);
             // add the courses to the request object so it'll be passed on to the next part of the route
             req.courses = courses;
 
             // make sure next() is a function by giving it a default value of an empty function if it's not a function already
-            Y.Lang.isFunction(next) || (next = function () {} );
-            
+            Y.Lang.isFunction(next) || (next = function() {} );
+
             if (courses.isEmpty()) {       // there are no courses already loaded then
-                courses.load(function () { // call course load (which will sync etc)
+                courses.load(function() { // call course load (which will sync etc)
                     courses.logger();      // debug by calling logger()
                     next();                // call next only when the courses are loaded
                 });
             } else {                       // already loaded the courses so call next()
-                next(); 
+                next();
             }
         },
-        
+
         /**
          * Will show the course page view to show courses
          * @method showCoursePage
-         * @param req
-         * @param res
-         * @param next
+         * @param {object} req
+         * @param {object} res
+         * @param {function} next
          */
-        showCoursePage: function (req, res, next) {
+        showCoursePage: function(req, res, next) {
             var viewConfig = null;  // we might invoke the view with or without students so we'll use a config object to pass as an argument for clarity
-            
+
             if (req.coursecode) {
                 viewConfig = {
                         courseList: req.courses,
-                        coursecode: req.params.course, 
-                        studentList:req.students
+                        coursecode: req.params.course,
+                        studentList: req.students
                 };
             } else {
                 viewConfig = {
@@ -133,7 +133,7 @@ YUI().add('srsApp', function (Y) {
                 else if (!this.views.coursePage.instance && req.coursecode) {
                     this.showView('coursePage', viewConfig);
                     this.views.coursePage.instance.loadSubView(viewConfig).render();
-                } 
+                }
                 // we have a course view & a studentView but no course code so we want to remove the subview and reset the alreadyRenderedStudents flag
                 else if (this.views.coursePage.instance && this.views.coursePage.instance.studentView && !req.coursecode) {
                     this.views.coursePage.instance.unloadSubView().render();
@@ -144,19 +144,19 @@ YUI().add('srsApp', function (Y) {
                     // don't bother showing the view if we're already showing it
                     //if (this.get('activeView') !== this.views.coursePage.instance) {   // this line and the following work the same but I think the instanceof approach is better
                     if (!(this.get('activeView') instanceof this.views.coursePage.type)) {
-                        this.showView('coursePage', viewConfig, {update:true, render:true});
+                        this.showView('coursePage', viewConfig, {update: true, render: true});
                     }
                 }
             } catch (e) {  // in case there's any error just silently display it.
                 Y.log(e.message);
             }
             // make sure next() is a function by giving it a default value of an empty function if it's not a function already
-            Y.Lang.isFunction(next) || (next = function () {} );
+            Y.Lang.isFunction(next) || (next = function() {} );
             next();
 
-        },
-        
-        
+        }
+
+
     }, {
         /**
          * @attribute ATTRS
@@ -167,7 +167,7 @@ YUI().add('srsApp', function (Y) {
                 value: new Y.CourseList()
             },
             students: {
-                value: new Y.StudentList()  
+                value: new Y.StudentList()
             },
             root: {
                 value: '/yui-srsSteps/'
@@ -182,7 +182,7 @@ YUI().add('srsApp', function (Y) {
                         ]
                     },
                     {
-                        path: '/courses/', 
+                        path: '/courses/',
                         callbacks: [
                             'getCourses',
                             'showCoursePage'
@@ -195,7 +195,7 @@ YUI().add('srsApp', function (Y) {
                             'getStudents',
                             'showCoursePage'
                         ]
-                    },
+                    }
                 ]
             }
         }
