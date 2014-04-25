@@ -33,15 +33,26 @@ YUI().add('studentView', function (Y) {
                 data: this.students,
                 caption: 'Students on course',
                 
-                editable:      true,
+                editable: true,
                 defaultEditor: 'inline',
                 editOpenType:  'dblclick',
 
             });
+           this.table.getColumn(0).editable = false; // stop the studentid being editable but doesn't seem to work since 
+           /* in the gallery source
+            *  // Bailout if column is null, has editable:false or no editor assigned ...
+				//
+				if(col && col.editable === false && !editorInstance) {
+					return;
+				}
+			I'm sure that should be an OR for !editorInstance, which is what his comment says
+            */
            this.table.on('celleditor:editorSave', function (ev) {
         	   var evData = ev.cell,
         	       editedStudent = this.data.getByClientId(ev.cell.recClientId);
-        	   editedStudent.save({field: evData.colKey, value: evData.value});
+        	   if (evData.colKey!=='studentid') { // since the previous setting editable doesn't work this kludge at least stops the save
+        		   editedStudent.save({field: evData.colKey, value: evData.value});
+        	   }
            });
 
         },
