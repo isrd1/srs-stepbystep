@@ -33,10 +33,21 @@ YUI({
         courseListView: {
             path: 'views/courseListView.js',
             requires: []
+        },
+        cellEditRollup: {
+        	use: [
+    	        //"gallery-datatable-celleditor-popup",
+    	        "gallery-datatable-celleditor-inline",
+        	    //"gallery-datatable-selection",
+        	    //'gallery-datatable-formatters',
+        	    'node-screen'
+        	   ]
         }
 
-    }
-}).use('srsApp', function(Y) {
+    },
+    gallery: 'gallery-2013.01.16-21-05'
+    	
+}).use('srsApp', 'cellEditRollup', function(Y) {
         var srsApp = new Y.SRSApp({
                 transitions: true,
                 container: '#wrapper',

@@ -31,8 +31,19 @@ YUI().add('studentView', function (Y) {
                 recordType: this.students.model,
                 sortable: true,
                 data: this.students,
-                caption: 'Students on course'
+                caption: 'Students on course',
+                
+                editable:      true,
+                defaultEditor: 'inline',
+                editOpenType:  'dblclick',
+
             });
+           this.table.on('celleditor:editorSave', function (ev) {
+        	   var evData = ev.cell,
+        	       editedStudent = this.data.getByClientId(ev.cell.recClientId);
+        	   editedStudent.save({field: evData.colKey, value: evData.value});
+           });
+
         },
 
         /**
@@ -49,11 +60,6 @@ YUI().add('studentView', function (Y) {
             this.table.render(tableNode);
             
             content.append(tableNode);
-            
-//            if (!container.inDoc()) {
-//                container.set('id', 'studentList');  /* give the display container an id so we can render the table in it */
-//                Y.one('body').append(container);
-//            }
 
             /* Sets the document fragment containing the two rendered sub-views as the contents of this view's container. */
             container.setHTML(content);
@@ -77,5 +83,5 @@ YUI().add('studentView', function (Y) {
         }
     });
 }, '0.0.9', {
-    requires: ['datatable']
+    requires: ['datatable', 'gallery-datatable-celleditor-inline']
 });

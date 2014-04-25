@@ -52,6 +52,16 @@ switch ($route) {
         $retval     = $rs->getRecordSet($sqlCourses, 'ResultSet', array(':dcode' => '3H'));
         echo $retval;
         break;
+    case 'updateStudent':
+    	$data = isset($_POST['student']) ? $_POST['student'] : null;
+    	if (!empty($data)) {
+    		$json = json_decode($data);
+    		$studentUpdateSQL = "update srs_student set surname=:surname, forename=:forename, email=:email, stage=:stage where studentid=:studentid";
+    		$rs = new JSONRecordSet();
+    		$retval = $rs->getRecordSet($studentUpdateSQL, 'ResultSet', array(':surname'=>$json->surname,':forename'=>$json->forename,':email'=>$json->email,':stage'=>$json->stage,':studentid'=>$json->studentid,));
+    		echo '{"status":{"text":"updated", "studentid":"'.$json->studentid.'"}';
+    	}
+    	break;
     default:
         echo '{"status":{"text":"default"}}';
         break;

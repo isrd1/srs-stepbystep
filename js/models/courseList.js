@@ -2,11 +2,15 @@ YUI().add('courseList', function (Y) {
     Y.CourseList = Y.Base.create('courseList', Y.ModelList, [Y.ModelSync.REST], {
         // By convention `Y.StudentList`'s `root` will be used for the lists' URL.
         model: Y.CourseModel,
-        url: '/yui-srsSteps/server/index.php?action=list&subject=courses',  // this is the dynamic url to use if you have the php working '/yui-srsSteps/server/index.php?action=list&subject=courses',
+        getUrl: function (action, subject) {
+        	action = action || 'list';
+        	subject = subject || 'courses';
+        	return '/yui-srsSteps/server/index.php?action=' + action + '&subject=' + subject;  // this is the dynamic url to use if you have the php working '/yui-srsSteps/server/index.php?action=list&subject=courses',
+        },
     
         sync: function (action, options, callback) {
             if (action === 'read') {
-                Y.io(this.url, {
+                Y.io(this.getUrl('list', 'courses'), {
                     on: {
                         complete: function(id, xhr) {
                             Y.Lang.isFunction(callback) || (callback = function () { });
