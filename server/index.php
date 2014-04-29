@@ -52,6 +52,26 @@ switch ($route) {
         $retval     = $rs->getRecordSet($sqlCourses, 'ResultSet', array(':dcode' => '3H'));
         echo $retval;
         break;
+    /**
+     * searches for courses containing string
+     */
+    case 'searchCourses':
+    	$searchstr = isset($_REQUEST['filter']) ? $_REQUEST['filter'] : null;
+    	if (!empty($searchstr)) {
+        $sqlCourses = "SELECT coursecode, coursetitle, department
+                       FROM srs_course c
+                       INNER JOIN srs_dept d
+                       ON c.deptcode=d.deptcode
+                       WHERE c.deptcode=:dcode
+        			   and coursetitle like :searchstr
+                       ORDER BY coursetitle";
+        $rs         = new JSONRecordSet();
+        $retval     = $rs->getRecordSet($sqlCourses, 'ResultSet', array(':dcode' => '3H', ':searchstr'=>"%{$searchstr}%"));
+        echo $retval;
+    	} else {
+    		'{"status":{"text":"no records found"}}';
+    	}
+        break;
     case 'updateStudent':
     	$data = isset($_POST['student']) ? $_POST['student'] : null;
     	if (!empty($data)) {
@@ -59,7 +79,7 @@ switch ($route) {
     		$studentUpdateSQL = "update srs_student set surname=:surname, forename=:forename, email=:email, stage=:stage where studentid=:studentid";
     		$rs = new JSONRecordSet();
     		$retval = $rs->getRecordSet($studentUpdateSQL, 'ResultSet', array(':surname'=>$json->surname,':forename'=>$json->forename,':email'=>$json->email,':stage'=>$json->stage,':studentid'=>$json->studentid,));
-    		echo '{"status":{"text":"updated", "studentid":"'.$json->studentid.'"}';
+    		echo '{"status":{"text":"updated", "studentid":"'.$json->studentid.'"}}';
     	}
     	break;
     default:

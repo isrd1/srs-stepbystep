@@ -17,10 +17,14 @@ YUI().add('srsApp', function(Y) {
      * @constructor
      */
     Y.SRSApp = Y.Base.create('srsApp', Y.App, [], {
-
+        searchStr: null,
+        
         initializer: function() {
            this.once('ready', function(e) {
-
+               Y.one('#searchBtn').on('click', function (e) {
+                   var st = Y.one('#searchText');
+                   this.findCourses(st.get('value'));
+               }, this);
                Y.on('srsapp:courseChange', this.navigateToStudents, this);
 
                if (this.hasRoute(this.getPath())) {
@@ -40,6 +44,12 @@ YUI().add('srsApp', function(Y) {
             coursePage: {  // only one view since this will manage subviews for course & student
                 type: Y.CoursePageView,
                 preserve: true
+            }
+        },
+        
+        findCourses: function(searchStr) {
+            if (searchStr) {
+                this.navigate('/yui-srsSteps/courses/search/' + searchStr);
             }
         },
 
@@ -76,24 +86,33 @@ YUI().add('srsApp', function(Y) {
          * @param {function} next If the callback for the path is an array of methods this contains the next method to call
          */
         getCourses: function(req, res, next) {
-            var courses = this.get('courses');   // defined in ATTRS section below
-
+            var courses = this.get('courses'),   // defined in ATTRS section below
+                searchStr,
+                options = {};
             Y.log('in getCourses');
             Y.log(req);
             // add the courses to the request object so it'll be passed on to the next part of the route
             req.courses = courses;
-
+            searchStr = req.params.searchstr || null;
             // make sure next() is a function by giving it a default value of an empty function if it's not a function already
             Y.Lang.isFunction(next) || (next = function() {} );
 
-            if (courses.isEmpty()) {       // there are no courses already loaded then
-                courses.load(function() { // call course load (which will sync etc)
+            if (courses.isEmpty() || searchStr !== this.searchStr) {       // there are no courses already loaded then
+                if (searchStr !== null) {
+                    options.action = 'search';
+                    options.filter = 'filter=' + searchStr;
+                    Y.one('#searchText').set('value', searchStr);  // in case the page is reloaded put the search term back in the form -dodgy really that here in the router we're altering the interface
+                } else {
+                    options.action = 'list';
+                }
+                courses.load(options, function() { // call course load (which will sync etc)
                     courses.logger();      // debug by calling logger()
                     next();                // call next only when the courses are loaded
                 });
             } else {                       // already loaded the courses so call next()
                 next();
             }
+            this.searchStr = searchStr;   // store the local search string into the class property so it persists and we can compare next time.
         },
 
         /**
@@ -193,6 +212,13 @@ YUI().add('srsApp', function(Y) {
                         callbacks: [
                             'getCourses',
                             'getStudents',
+                            'showCoursePage'
+                        ]
+                    },
+                    {
+                        path: '/courses/search/:searchstr',
+                        callbacks: [
+                            'getCourses',
                             'showCoursePage'
                         ]
                     }
