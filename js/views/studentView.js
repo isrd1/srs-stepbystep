@@ -40,7 +40,7 @@ YUI().add('studentView', function (Y) {
             });
            this.table.getColumn(0).editable = false; // stop the studentid being editable but doesn't seem to work since 
            /* in the gallery source
-            *  // Bailout if column is null, has editable:false or no editor assigned ...
+            *  // Bailout if column is null, has editable:false or no editor assigned ... line 346
 				//
 				if(col && col.editable === false && !editorInstance) {
 					return;
